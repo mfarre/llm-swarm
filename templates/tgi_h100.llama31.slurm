@@ -29,7 +29,7 @@ function unused_port() {
 export PORT=$(unused_port)
 if [ -z "$HUGGING_FACE_HUB_TOKEN" ]; then
     # try reading from file
-    export HUGGING_FACE_HUB_TOKEN=$(cat ~/.cache/huggingface/token)
+    export HUGGING_FACE_HUB_TOKEN=$(cat /fsx/miquel/cache/token)
 fi
 echo "Starting TGI container port $PORT"
 echo "http://$(hostname -I | awk '{print $1}'):$PORT" >> {{slurm_hosts_path}}
