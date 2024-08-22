@@ -31,18 +31,8 @@ if [ -z "$HUGGING_FACE_HUB_TOKEN" ]; then
     # try reading from file
     export HUGGING_FACE_HUB_TOKEN=$(cat /fsx/miquel/cache/token)
 fi
-#echo "Starting TGI container port $PORT"
-#echo "http://$(hostname -I | awk '{print $1}'):$PORT" >> {{slurm_hosts_path}}
-
-# Get the node name associated with your job
-NODE_NAME=$(squeue -u $USER -h -o "%N" -j $SLURM_JOB_ID)
-
-# Resolve the node name to an IP address
-IP_ADDRESS=$(nslookup $NODE_NAME | grep 'Address' | tail -n1 | awk '{print $2}')
-
-echo "Starting TGI container on port $PORT"
-echo "http://$IP_ADDRESS:$PORT" >> {{slurm_hosts_path}}
-
+echo "Starting TGI container port $PORT"
+echo "http://$(hostname -I | awk '{print $1}'):$PORT" >> {{slurm_hosts_path}}
 
 # unset cache dirs to avoid pyxis having host env var somehow get into the container
 unset HF_HUB_CACHE HF_ASSETS_CACHE HF_DATASETS_CACHE HF_MODULES_CACHE
