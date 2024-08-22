@@ -12,8 +12,9 @@ with LLMSwarm(
     LLMSwarmConfig(
         instances=1,
         inference_engine="tgi",
-        slurm_template_path="templates/tgi_h100.llama31.slurm",  # Ensure the template matches your setup
-        load_balancer_template_path="templates/nginx.template.conf",
+        slurm_template_path="../templates/tgi_h100.template.slurm",  # Ensure the template matches your setup
+        load_balancer_template_path="../templates/nginx.template.conf",
+        model="meta-llama/Meta-Llama-3.1-70B-Instruct"
     )
 ) as llm_swarm:
     # Update the model to Llama 3.1 70B
@@ -24,7 +25,6 @@ with LLMSwarm(
     
     # Adjust special tokens if necessary (Llama models often have specific tokenization)
     tokenizer.add_special_tokens({"sep_token": "", "cls_token": "", "mask_token": "", "pad_token": "[PAD]"})
-
     async def process_text(task):
         # Adjust prompt formatting if needed for Llama
         prompt = tokenizer.apply_chat_template(
