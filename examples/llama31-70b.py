@@ -1,14 +1,25 @@
 import asyncio
 import json
 import pandas as pd
+import os
 from llm_swarm import LLMSwarm, LLMSwarmConfig
 from huggingface_hub import AsyncInferenceClient
 from transformers import AutoTokenizer
 from tqdm.asyncio import tqdm_asyncio
 
-# Load the prompts from the JSON file
-with open("prompts.json", "r") as f:
-    tasks = json.load(f)
+# Function to load all prompts from multiple JSON files in the specified directory
+def load_prompts_from_directory(directory):
+    all_tasks = []
+    for filename in os.listdir(directory):
+        if filename.endswith(".json"):
+            file_path = os.path.join(directory, filename)
+            with open(file_path, "r", encoding="utf-8") as file:
+                tasks = json.load(file)
+                all_tasks.extend(tasks)
+    return all_tasks
+
+# Load all prompts from the prompts/ directory
+tasks = load_prompts_from_directory("prompts")
 
 # Configure and start the LLM-Swarm with Llama 3.1 70B
 with LLMSwarm(
