@@ -32,6 +32,7 @@ async def process_file(file_path, client, tokenizer):
                 {"role": "user", "content": prompt},
             ],
             tokenize=False,
+            add_generation_prompt=True
         )
 
         # Send the prompt to the model and get the response
@@ -59,41 +60,42 @@ with LLMSwarm(
         inference_engine="tgi",
         slurm_template_path="../templates/tgi_h100.template.slurm",  # Ensure the template matches your setup
         load_balancer_template_path="../templates/nginx.template.conf",
-        model="meta-llama/Meta-Llama-3.1-70B-Instruct",
+#        model="meta-llama/Meta-Llama-3.1-70B-Instruct",
+        model="meta-llama/Meta-Llama-3.1-8B-Instruct"
     )
 ) as llm_swarm:
     # Initialize the client with the model endpoint
     client = AsyncInferenceClient(model=llm_swarm.endpoint)
     
     # Load the tokenizer for Llama 3.1 70B
-    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3.1-70B-Instruct")
-        
+    #tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3.1-70B-Instruct")
+    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3.1-8B-Instruct")
     # Given this issue: https://huggingface.co/meta-llama/Meta-Llama-3.1-70B-Instruct/discussions/10
     # we apply the configuration settings to the tokenizer
-    config_path = "tokenizer_config.json"
-    with open(config_path, "r", encoding="utf-8") as f:
-        tokenizer_config = json.load(f)
+    # config_path = "tokenizer_config.json"
+    # with open(config_path, "r", encoding="utf-8") as f:
+    #     tokenizer_config = json.load(f)
 
-    tokenizer.bos_token = tokenizer_config["bos_token"]
-    tokenizer.eos_token = tokenizer_config["eos_token"]
-    chat_template = tokenizer_config["chat_template"]
-    tokenizer.model_input_names = tokenizer_config["model_input_names"]
-    tokenizer.model_max_length = tokenizer_config["model_max_length"]
+    # tokenizer.bos_token = tokenizer_config["bos_token"]
+    # tokenizer.eos_token = tokenizer_config["eos_token"]
+    # chat_template = tokenizer_config["chat_template"]
+    # tokenizer.model_input_names = tokenizer_config["model_input_names"]
+    # tokenizer.model_max_length = tokenizer_config["model_max_length"]
 
-    if "clean_up_tokenization_spaces" in tokenizer_config:
-        tokenizer.clean_up_tokenization_spaces = tokenizer_config["clean_up_tokenization_spaces"]
+    # if "clean_up_tokenization_spaces" in tokenizer_config:
+    #     tokenizer.clean_up_tokenization_spaces = tokenizer_config["clean_up_tokenization_spaces"]
 
-    for token_id, token_attributes in tokenizer_config["added_tokens_decoder"].items():
-        # Create an AddedToken object with the token's attributes
-        added_token = AddedToken(
-            token_attributes["content"],
-            lstrip=token_attributes.get("lstrip", False),
-            rstrip=token_attributes.get("rstrip", False),
-            single_word=token_attributes.get("single_word", False),
-            normalized=token_attributes.get("normalized", False)
-        )
-        # Add the AddedToken to the tokenizer
-        tokenizer.add_tokens([added_token], special_tokens=token_attributes.get("special", False))
+    # for token_id, token_attributes in tokenizer_config["added_tokens_decoder"].items():
+    #     # Create an AddedToken object with the token's attributes
+    #     added_token = AddedToken(
+    #         token_attributes["content"],
+    #         lstrip=token_attributes.get("lstrip", False),
+    #         rstrip=token_attributes.get("rstrip", False),
+    #         single_word=token_attributes.get("single_word", False),
+    #         normalized=token_attributes.get("normalized", False)
+    #     )
+    #     # Add the AddedToken to the tokenizer
+    #     tokenizer.add_tokens([added_token], special_tokens=token_attributes.get("special", False))
 
 
     # Main async function to process all files one by one
